@@ -11,7 +11,18 @@ import random
 from apscheduler.schedulers.background import BackgroundScheduler
 from InstagramAPI import InstagramAPI
 
+from termcolor import colored, cprint
 
+
+banner = """
+#### ##    ##  ######  ########    ###    ########   #######  ########
+ ##  ###   ## ##    ##    ##      ## ##   ##     ## ##     ##    ##
+ ##  ####  ## ##          ##     ##   ##  ##     ## ##     ##    ##
+ ##  ## ## ##  ######     ##    ##     ## ########  ##     ##    ##
+ ##  ##  ####       ##    ##    ######### ##     ## ##     ##    ##
+ ##  ##   ### ##    ##    ##    ##     ## ##     ## ##     ##    ##
+#### ##    ##  ######     ##    ##     ## ########   #######     ##
+"""
 ##############################
 #      APScheduler jobs      #
 ##############################
@@ -188,12 +199,13 @@ def tick(tick):
 
 
 if __name__ == '__main__':
-
-    # First, we create an IG API instance for each account provided in the account list .txt file
+    # First, before EVERYTHING, we print a butiful ASCII logo
+    cprint(banner, 'green')
+    # Then, we create an IG API instance for each account provided in the account list .txt file
     create_ig_api_instances("accounts.txt")
 
     # Then we log in to Instagram each instance/account
-    login_ig_api_instances()
+    #login_ig_api_instances()
 
     #upload_photo(0)
     #logout_ig_api_instances()
@@ -206,8 +218,8 @@ if __name__ == '__main__':
 
     # Instabot just started! :D
 
-    print('Instabot just started! :)')
-    print('Press Ctrl+{0} to exit'.format('Break' if os.name == 'nt' else 'C'))
+    cprint('Instabot just started! :)', 'cyan')
+    cprint('Press Ctrl+{0} to exit'.format('Break' if os.name == 'nt' else 'C'), 'magenta')
 
     try:
         # This is here to simulate application activity (which keeps the main thread alive).
