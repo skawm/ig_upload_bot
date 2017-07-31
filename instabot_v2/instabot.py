@@ -23,12 +23,35 @@ def scheduler_setup():
         global scheduler
         scheduler = BackgroundScheduler()
 
+        # # # # # # # # # # # # # # #
+        # HERE WE ADD THE CRON JOBS #
+        # # # # # # # # # # # # # # #
+
+
+        # Parameters:
+
+        #year (int|str) – 4-digit year
+        #month (int|str) – month (1-12)
+        #day (int|str) – day of the (1-31)
+        #week (int|str) – ISO week (1-53)
+        #day_of_week (int|str) – number or name of weekday (0-6 or mon,tue,wed,thu,fri,sat,sun)
+        #hour (int|str) – hour (0-23)
+        #minute (int|str) – minute (0-59)
+        #second (int|str) – second (0-59)
+        #start_date (datetime|str) – earliest possible date/time to trigger on (inclusive)
+        #end_date (datetime|str) – latest possible date/time to trigger on (inclusive)
+        #timezone (datetime.tzinfo|str) – time zone to use for the date/time calculations (defaults to scheduler timezone)
+
+        # To include parameters into a job you can use args=[''] or use a lambda : func(args)
+        # here's a sample job
+        # scheduler.add_job(tick, 'cron', args= ['tickk'], second=15, timezone="Europe/Paris")
+
+
+
+
 # Here we define the scheduler jobs and we start the scheduler
 def scheduler_start_n_go():
-        # Add the cron jobs (Instagram bots)
-        #scheduler.add_job(lambda: tick("tickk"), 'cron', second=15, timezone="Europe/Paris")
-        scheduler.add_job(tick, 'cron', args= ['tickk'], second=15, timezone="Europe/Paris")
-        # Start the Background Scheduler
+        # Simply start the Background Scheduler
         scheduler.start()
 
 
@@ -91,8 +114,8 @@ def get_caption(number):
 
             return random.choice(captions_raw)
 
-        except ValueError as err:
-            print(err.args)
+        except:
+            return ""
 
 
 # Upload a photo to the account Number (using his pics folder and get_caption())
@@ -145,9 +168,10 @@ def simulate_activity(number):
         instance[number].getv2Inbox()
         instance[number].getRecentActivity()
 
-# This job simply combine simulate_activity and upload_photo
-def complete_uploading_photo_deluxe(number):
+# This DELUXE job simply combine simulate_activity and upload_photo
+def uploading_photo_deluxe(number):
         simulate_activity(number)
+        time.sleep(random.randint(4,15))
         upload_photo(number)
 
 
@@ -167,20 +191,22 @@ if __name__ == '__main__':
 
     # First, we create an IG API instance for each account provided in the account list .txt file
     create_ig_api_instances("accounts.txt")
+
     # Then we log in to Instagram each instance/account
     login_ig_api_instances()
-    upload_photo(0)
-    logout_ig_api_instances()
 
-    # We log in each API instance
-    #login_ig_api_instances()
-    # WHILE DEVELOPEMENT
+    #upload_photo(0)
     #logout_ig_api_instances()
 
-    # Start the scheduler for instabot!
-    # Instabot just started!
+    # Setup the scheduler for instabot! :)
+    scheduler_setup()
 
+    # Start the scheduler !! :)
+    scheduler_start_n_go()
 
+    # Instabot just started! :D
+
+    print('Instabot just started! :)')
     print('Press Ctrl+{0} to exit'.format('Break' if os.name == 'nt' else 'C'))
 
     try:
@@ -188,6 +214,6 @@ if __name__ == '__main__':
         while True:
             time.sleep(100)
     except (KeyboardInterrupt, SystemExit):
-        # Not strictly necessary if daemonic mode is enabled but should be done if possible
+        # We shutdown the scheduler and we logout of each Instagram account
         scheduler.shutdown()
         logout_ig_api_instances()
