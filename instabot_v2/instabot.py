@@ -56,7 +56,7 @@ def scheduler_setup():
         # To include parameters into a job you can use args=[''] or use a lambda : func(args)
         # here's a sample job
         # scheduler.add_job(tick, 'cron', args= ['tickk'], second=15, timezone="Europe/Paris")
-
+        cprint('Scheduler ready to go!', 'green')
 
 
 
@@ -64,7 +64,7 @@ def scheduler_setup():
 def scheduler_start_n_go():
         # Simply start the Background Scheduler
         scheduler.start()
-
+        cprint('scheduler started!', 'green')
 
 #############################
 #       Instabot jobs       #
@@ -94,6 +94,7 @@ def create_ig_api_instances(accounts_filename):
         # Then create the different instances
         for i in range(0, len(accounts)):
             instance[i] = InstagramAPI(accounts[i][0], accounts[i][1])
+            cprint('Instance created for {0}'.format(accounts[i][0]), 'blue')
 
     except ValueError as err:
         print(err.args)
@@ -106,6 +107,7 @@ def login_ig_api_instances():
         for i in range(0, len(instance)):
             instance[i].login()
 
+        cprint('Accounts just logged in :)', 'green')
 
 
 # Log out to Instagram for each account
@@ -114,6 +116,7 @@ def logout_ig_api_instances():
         for i in range(0, len(instance)):
             instance[i].logout()
 
+        cprint('Accounts just logged out :)', 'green')
 
 
 # Generate a random caption from the account Number and his captions list
@@ -122,10 +125,11 @@ def get_caption(number):
             actual_dir_path = os.path.dirname(os.path.realpath(__file__))
             captions_location_path = "{0}/captions/{1}.txt".format(actual_dir_path, accounts[number][0])
             captions_raw = open(captions_location_path).read().split("_-_-_\n")
-
+            cprint('Caption generated', 'green')
             return random.choice(captions_raw)
 
         except:
+            cprint('/!\ No caption generated', 'red')
             return ""
 
 
@@ -154,17 +158,21 @@ def upload_photo(number):
             if pic_extension == 'jpg' or extension == 'jpeg':
 
                 instance[number].uploadPhoto(final_pic_path, get_caption(number))
-
+                cprint('Just uploaded a pic to {0}'.format(accounts[number][0]), 'green')
             else:
-                print("error with file :(")
-        except ValueError as err:
-            print(err.args)
+                cprint('error with picture to upload :(', 'red')
+        except:
+            cprint('/!\ No pic uploaded, need debug if persist', 'red')
 
 
 
 # Job to simulate a real activity on the account (to be continued)
 def simulate_random_activity(number):
-        time.sleep(random.randint(0,7200))
+        time_to_sleep = random.randint(0,7200)
+        print('Simulating random activity, gonna sleep for {0}'.format(str(time_to_sleep)), 'cyan')
+
+        time.sleep(time_to_sleep)
+
         instance[number].syncFeatures()
         instance[number].autoCompleteUserList()
         instance[number].timelineFeed()
@@ -205,9 +213,8 @@ if __name__ == '__main__':
     create_ig_api_instances("accounts.txt")
 
     # Then we log in to Instagram each instance/account
-    #login_ig_api_instances()
+    login_ig_api_instances()
 
-    #upload_photo(0)
     #logout_ig_api_instances()
 
     # Setup the scheduler for instabot! :)
@@ -220,7 +227,7 @@ if __name__ == '__main__':
 
     cprint('Instabot just started! :)', 'cyan')
     cprint('Press Ctrl+{0} to exit'.format('Break' if os.name == 'nt' else 'C'), 'magenta')
-
+    #upload_photo(0)
     try:
         # This is here to simulate application activity (which keeps the main thread alive).
         while True:
