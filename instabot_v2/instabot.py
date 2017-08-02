@@ -53,9 +53,43 @@ def scheduler_setup():
         #end_date (datetime|str) – latest possible date/time to trigger on (inclusive)
         #timezone (datetime.tzinfo|str) – time zone to use for the date/time calculations (defaults to scheduler timezone)
 
+        # To run a job, you'll need to specify the number of the account concerned. Take a look at your accounts.txt file:
+        # 1st account (line 1) is number 0, 2nd account (line 2) is number 1, etc..
+
+
+
         # To include parameters into a job you can use args=[''] or use a lambda : func(args)
-        # here's a sample job
-        # scheduler.add_job(tick, 'cron', args= ['tickk'], second=15, timezone="Europe/Paris")
+        # here's a sample job, written in the two possibility
+        #scheduler.add_job(tick, 'cron', args= ['tickk'], second=15, timezone="Europe/Paris")
+        #scheduler.add_job(lambda: tick("tickk"), 'cron', second=15, timezone="Europe/Paris")
+
+
+
+
+        # /!\ MAKE SURE YOU DON'T POST TWO PICS IN THE SAME TIME /!\
+        # Posting jobs
+        scheduler.add_job(upload_photo_deluxe, 'cron', args=[1], hour=9, minute=30, timezone="Europe/Paris")  # Humourdebob
+        scheduler.add_job(upload_photo_deluxe, 'cron', args=[1], hour=11, minute=59, timezone="Europe/Paris") # Humourdebob
+        scheduler.add_job(upload_photo_deluxe, 'cron', args=[1], hour=16, minute=30, timezone="Europe/Paris") # Humourdebob
+        scheduler.add_job(upload_photo_deluxe, 'cron', args=[1], hour=16, minute=52, timezone="Europe/Paris") # Humourdebob
+        scheduler.add_job(upload_photo_deluxe, 'cron', args=[0], hour=16, minute=59, timezone="Europe/Paris") # Smsdedingue
+        scheduler.add_job(upload_photo_deluxe, 'cron', args=[1], hour=17, minute=5, timezone="Europe/Paris")  # Humourdebob
+        scheduler.add_job(upload_photo_deluxe, 'cron', args=[0], hour=17, minute=9, timezone="Europe/Paris")  # Smsdedingue
+        scheduler.add_job(upload_photo_deluxe, 'cron', args=[1], hour=17, minute=29, timezone="Europe/Paris") # Humourdebob
+        scheduler.add_job(upload_photo_deluxe, 'cron', args=[1], hour=18, minute=0, timezone="Europe/Paris")  # Humourdebob
+
+        # Activity jobs
+        scheduler.add_job(simulate_random_activity, 'cron', args=[0], hour=7, minute=59, timezone="Europe/Paris")  # Smsdedingue
+        scheduler.add_job(simulate_random_activity, 'cron', args=[1], hour=9, minute=59, timezone="Europe/Paris")  # Humourdebob
+        scheduler.add_job(simulate_random_activity, 'cron', args=[0], hour=13, minute=25, timezone="Europe/Paris") # Smsdedingue
+        scheduler.add_job(simulate_random_activity, 'cron', args=[1], hour=18, minute=04, timezone="Europe/Paris") # Humourdebob
+        scheduler.add_job(simulate_random_activity, 'cron', args=[0], hour=20, minute=9, timezone="Europe/Paris")  # Smsdedingue
+        scheduler.add_job(simulate_random_activity, 'cron', args=[1], hour=22, minute=9, timezone="Europe/Paris")  # Humourdebob
+        scheduler.add_job(simulate_random_activity, 'cron', args=[0], hour=0, minute=9, timezone="Europe/Paris")   # Smsdedingue
+        scheduler.add_job(simulate_activity, 'cron', args=[1], hour=2, minute=10, timezone="Europe/Paris")         # Humourdebob
+        #dev
+        #scheduler.add_job(upload_photo_deluxe, 'cron', args=[0], hour=21, minute=6, timezone="Europe/Paris" )
+
         cprint('Scheduler ready to go!', 'green')
 
 
@@ -64,7 +98,7 @@ def scheduler_setup():
 def scheduler_start_n_go():
         # Simply start the Background Scheduler
         scheduler.start()
-        cprint('scheduler started!', 'green')
+        cprint('Scheduler started!', 'green')
 
 #############################
 #       Instabot jobs       #
@@ -106,7 +140,7 @@ def login_ig_api_instances():
         # For each instance we log in to Instagram
         for i in range(0, len(instance)):
             instance[i].login()
-
+            time.sleep(10)
         cprint('Accounts just logged in :)', 'green')
 
 
@@ -115,7 +149,7 @@ def logout_ig_api_instances():
         # For each instance we log out of Instagram
         for i in range(0, len(instance)):
             instance[i].logout()
-
+            time.sleep(10)
         cprint('Accounts just logged out :)', 'green')
 
 
@@ -159,38 +193,49 @@ def upload_photo(number):
 
                 instance[number].uploadPhoto(final_pic_path, get_caption(number))
                 cprint('Just uploaded a pic to {0}'.format(accounts[number][0]), 'green')
+
             else:
                 cprint('error with picture to upload :(', 'red')
+
+            # Remove the uploaded pic from the folder so we never gonna repost it
+            os.remove(final_pic_path)
         except:
             cprint('/!\ No pic uploaded, need debug if persist', 'red')
 
 
 
 # Job to simulate a real activity on the account (to be continued)
-def simulate_random_activity(number):
-        time_to_sleep = random.randint(0,7200)
-        print('Simulating random activity, gonna sleep for {0}'.format(str(time_to_sleep)), 'cyan')
-
-        time.sleep(time_to_sleep)
-
-        instance[number].syncFeatures()
-        instance[number].autoCompleteUserList()
-        instance[number].timelineFeed()
-        instance[number].getv2Inbox()
-        instance[number].getRecentActivity()
-
 # To use before posting anything /!\ BE CAREFUL IT'S IMPORTANT /!\
 def simulate_activity(number):
         instance[number].syncFeatures()
+        time.sleep(1)
         instance[number].autoCompleteUserList()
+        time.sleep(1)
         instance[number].timelineFeed()
+        time.sleep(1)
         instance[number].getv2Inbox()
+        time.sleep(1)
         instance[number].getRecentActivity()
 
-# This DELUXE job simply combine simulate_activity and upload_photo
-def uploading_photo_deluxe(number):
+
+
+def simulate_random_activity(number):
+        time_to_sleep = random.randint(0,7200)
+        cprint('Simulating random activity, gonna sleep for {0}'.format(str(time_to_sleep)), 'cyan')
+
+        time.sleep(time_to_sleep)
+
         simulate_activity(number)
-        time.sleep(random.randint(4,15))
+
+
+# This DELUXE job simply combine simulate_activity and upload_photo
+def upload_photo_deluxe(number):
+        time_to_sleep = random.randint(0,120)#300s
+        cprint('Simulating random sleep before upload a pic, gonna sleep for {0}'.format(str(time_to_sleep)), 'cyan')
+        time.sleep(time_to_sleep)
+        cprint('Just sleeped well :)', 'cyan')
+        simulate_activity(number)
+        time.sleep(random.randint(7,15))
         upload_photo(number)
 
 
@@ -215,8 +260,6 @@ if __name__ == '__main__':
     # Then we log in to Instagram each instance/account
     login_ig_api_instances()
 
-    #logout_ig_api_instances()
-
     # Setup the scheduler for instabot! :)
     scheduler_setup()
 
@@ -227,12 +270,13 @@ if __name__ == '__main__':
 
     cprint('Instabot just started! :)', 'cyan')
     cprint('Press Ctrl+{0} to exit'.format('Break' if os.name == 'nt' else 'C'), 'magenta')
-    #upload_photo(0)
+
     try:
         # This is here to simulate application activity (which keeps the main thread alive).
         while True:
             time.sleep(100)
     except (KeyboardInterrupt, SystemExit):
         # We shutdown the scheduler and we logout of each Instagram account
+        cprint('shutdown, please wait for correct exit', 'red')
         scheduler.shutdown()
         logout_ig_api_instances()
