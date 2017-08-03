@@ -9,6 +9,9 @@ import os
 import random
 
 from apscheduler.schedulers.background import BackgroundScheduler
+
+from instagram_private_api import Client
+
 from InstagramAPI import InstagramAPI
 
 from termcolor import colored, cprint
@@ -127,7 +130,7 @@ def create_ig_api_instances(accounts_filename):
 
         # Then create the different instances
         for i in range(0, len(accounts)):
-            instance[i] = InstagramAPI(accounts[i][0], accounts[i][1])
+            instance[i] == Client(accounts[i][0], accounts[i][1])
             cprint('Instance created for {0}'.format(accounts[i][0]), 'blue')
 
     except ValueError as err:
