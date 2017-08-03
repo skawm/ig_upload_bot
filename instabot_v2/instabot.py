@@ -14,6 +14,9 @@ from instagram_private_api import Client
 
 from InstagramAPI import InstagramAPI
 
+#Import PIL in order to know picture's size
+from PIL import Image
+
 from termcolor import colored, cprint
 
 
@@ -191,10 +194,14 @@ def upload_photo(number):
             # Find and verify the extension (must be jpg or jpeg)
             pic_extension = chosen_pic.split('.')[-1]
 
+            # Find the picture's size and set it in a tuple which is required by the upload function
+            picture = Image.open(final_pic_path)
+            width, height = picture.size
+            size = (width, height)
+
             # Upload the pic
             if pic_extension == 'jpg' or extension == 'jpeg':
-
-                instance[number].post_photo(open(final_pic_path, 'rb').read(), ,get_caption(number))
+                instance[number].post_photo(open(final_pic_path, 'rb').read(), size, get_caption(number))
                 cprint('Just uploaded a pic to {0}'.format(accounts[number][0]), 'green')
 
             else:
