@@ -194,7 +194,7 @@ def upload_photo(number):
             # Upload the pic
             if pic_extension == 'jpg' or extension == 'jpeg':
 
-                instance[number].uploadPhoto(final_pic_path, get_caption(number))
+                instance[number].post_photo(open(final_pic_path, 'rb').read(), ,get_caption(number))
                 cprint('Just uploaded a pic to {0}'.format(accounts[number][0]), 'green')
 
             else:
