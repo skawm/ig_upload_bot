@@ -12,7 +12,6 @@ from apscheduler.schedulers.background import BackgroundScheduler
 
 from instagram_private_api import Client
 
-from InstagramAPI import InstagramAPI
 
 #Import PIL in order to know picture's size
 from PIL import Image
