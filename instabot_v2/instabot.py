@@ -73,25 +73,10 @@ def scheduler_setup():
 
         # /!\ MAKE SURE YOU DON'T POST TWO PICS IN THE SAME TIME /!\
         # Posting jobs
-        scheduler.add_job(upload_photo_deluxe, 'cron', args=[1], hour=9, minute=30, timezone="Europe/Paris")  # Humourdebob
-        scheduler.add_job(upload_photo_deluxe, 'cron', args=[1], hour=11, minute=59, timezone="Europe/Paris") # Humourdebob
-        scheduler.add_job(upload_photo_deluxe, 'cron', args=[1], hour=16, minute=30, timezone="Europe/Paris") # Humourdebob
-        scheduler.add_job(upload_photo_deluxe, 'cron', args=[1], hour=16, minute=52, timezone="Europe/Paris") # Humourdebob
-        scheduler.add_job(upload_photo_deluxe, 'cron', args=[0], hour=16, minute=59, timezone="Europe/Paris") # Smsdedingue
-        scheduler.add_job(upload_photo_deluxe, 'cron', args=[1], hour=17, minute=5, timezone="Europe/Paris")  # Humourdebob
-        scheduler.add_job(upload_photo_deluxe, 'cron', args=[0], hour=17, minute=9, timezone="Europe/Paris")  # Smsdedingue
-        scheduler.add_job(upload_photo_deluxe, 'cron', args=[1], hour=17, minute=29, timezone="Europe/Paris") # Humourdebob
-        scheduler.add_job(upload_photo_deluxe, 'cron', args=[1], hour=18, minute=0, timezone="Europe/Paris")  # Humourdebob
+
 
         # Activity jobs
-        scheduler.add_job(simulate_random_activity, 'cron', args=[0], hour=7, minute=59, timezone="Europe/Paris")  # Smsdedingue
-        scheduler.add_job(simulate_random_activity, 'cron', args=[1], hour=9, minute=59, timezone="Europe/Paris")  # Humourdebob
-        scheduler.add_job(simulate_random_activity, 'cron', args=[0], hour=13, minute=25, timezone="Europe/Paris") # Smsdedingue
-        scheduler.add_job(simulate_random_activity, 'cron', args=[1], hour=18, minute=04, timezone="Europe/Paris") # Humourdebob
-        scheduler.add_job(simulate_random_activity, 'cron', args=[0], hour=20, minute=9, timezone="Europe/Paris")  # Smsdedingue
-        scheduler.add_job(simulate_random_activity, 'cron', args=[1], hour=22, minute=9, timezone="Europe/Paris")  # Humourdebob
-        scheduler.add_job(simulate_random_activity, 'cron', args=[0], hour=0, minute=9, timezone="Europe/Paris")   # Smsdedingue
-        scheduler.add_job(simulate_activity, 'cron', args=[1], hour=2, minute=10, timezone="Europe/Paris")         # Humourdebob
+
         #dev
         #scheduler.add_job(upload_photo_deluxe, 'cron', args=[0], hour=21, minute=6, timezone="Europe/Paris" )
 
@@ -132,7 +117,7 @@ def create_ig_api_instances(accounts_filename):
 
         # Then create the different instances
         for i in range(0, len(accounts)):
-            instance[i] == Client(accounts[i][0], accounts[i][1])
+            instance[i] = Client(accounts[i][0], accounts[i][1])
             cprint('Instance created for {0}'.format(accounts[i][0]), 'blue')
 
     except ValueError as err:
