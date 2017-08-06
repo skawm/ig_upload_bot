@@ -97,15 +97,16 @@ def scheduler_start_n_go():
 # Create the InstagramAPI instances for each account
 def create_ig_api_instances(accounts_filename):
     try:
-        # Open file which contains the accounts and split lines
+        # Open file which contains the accounts and their proxys ip and split lines
         accounts_raw = open(accounts_filename, 'r').read().splitlines()
 
 
-        # Split account:password
+        # Split account:password:proxy
+        #Proxy format exemple ‘http://127.0.0.1:8888'
         global accounts
         accounts= []
         for i in range(0, len(accounts_raw)):
-            accounts.append(accounts_raw[i].split(':'))
+            accounts.append(accounts_raw[i].split('[]'))
 
 
         # Create InstagramAPI instance for each account
@@ -117,7 +118,7 @@ def create_ig_api_instances(accounts_filename):
 
         # Then create the different instances
         for i in range(0, len(accounts)):
-            instance[i] = Client(accounts[i][0], accounts[i][1])
+            instance[i] = Client(accounts[i][0], accounts[i][1], proxy=accounts[i][2])
             cprint('Instance created for {0}'.format(accounts[i][0]), 'blue')
 
     except ValueError as err:
@@ -186,7 +187,7 @@ def upload_photo(number):
                 picture = Image.open(final_pic_path)
                 width, height = picture.size
                 size = (width, height)
-                
+
                 # Upload the pic
                 instance[number].post_photo(open(final_pic_path, 'rb').read(), size, get_caption(number))
                 cprint('Just uploaded a pic to {0}'.format(accounts[number][0]), 'green')
