@@ -1,3 +1,4 @@
+
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
@@ -39,9 +40,9 @@ def scheduler_setup():
         global scheduler
         scheduler = BackgroundScheduler()
 
-        # # # # # # # # # # # # # # #
+        # # # # # # # # # # # # # # #
         # HERE WE ADD THE CRON JOBS #
-        # # # # # # # # # # # # # # #
+        # # # # # # # # # # # # # # #
 
 
         # Parameters:
@@ -118,7 +119,18 @@ def create_ig_api_instances(accounts_filename):
 
         # Then create the different instances
         for i in range(0, len(accounts)):
-            instance[i] = Client(accounts[i][0], accounts[i][1], proxy=accounts[i][2])
+            # Open file wich contains device_id, uuid, phone_id for each account (1 line for each parameter)
+            try:
+                settings = open(accounts[i][0] + "/settings.txt", "r").read().splitlines()
+                instance[i] = Client(accounts[i][0], accounts[i][1],
+                    proxy=accounts[i][2],
+                    device_id=settings[0],
+                    uuid=settings[1],
+                    phone_id=accounts[2])
+            except:
+                # No files containing settings
+                
+                instance[i] = Client(accounts[i][0], accounts[i][1], proxy=accounts[i][2])
             cprint('Instance created for {0}'.format(accounts[i][0]), 'blue')
 
     except ValueError as err:
