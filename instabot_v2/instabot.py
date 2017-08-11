@@ -20,6 +20,30 @@ from PIL import Image
 from termcolor import colored, cprint
 
 
+##############################
+#        Directory Tree      #
+##############################
+
+"""
+Instabot Directory Tree
+ |
+ |-- accounts.txt: file which contains the accounts and their proxys ip
+ |                 proxy format: http://127.0.0.1:8888
+ |                 account:password:proxy (each line)
+ |                 contents: "account:password:proxy
+ |                            account:password:proxy
+ |                            account:password:proxy"
+ |
+ |-- account directory: 1 directory for each account
+        |
+        |-- settings.txt: file wich contains device_id, uuid, phone_id
+        |                 contents: "device_id
+        |                            uuid
+        |                            phone_id"
+        |
+        |-- photos: directory containing photos to upload
+"""
+
 banner = """
 #### ##    ##  ######  ########    ###    ########   #######  ########
  ##  ###   ## ##    ##    ##      ## ##   ##     ## ##     ##    ##
@@ -129,7 +153,6 @@ def create_ig_api_instances(accounts_filename):
                     phone_id=accounts[2])
             except:
                 # No files containing settings
-                
                 instance[i] = Client(accounts[i][0], accounts[i][1], proxy=accounts[i][2])
             cprint('Instance created for {0}'.format(accounts[i][0]), 'blue')
 
@@ -178,7 +201,7 @@ def upload_photo(number):
             actual_dir_path = os.path.dirname(os.path.realpath(__file__))
 
             # Then determine what is the correspondant pics directory path
-            pics_dir_path = "{0}/pics/{1}".format(actual_dir_path, accounts[number][0])
+            pics_dir_path = "{0}/pics/{1}/photos".format(actual_dir_path, accounts[number][0])
 
             # Chose a random pic inside
             chosen_pic = random.choice(os.listdir(pics_dir_path))
