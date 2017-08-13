@@ -33,6 +33,9 @@ Instabot Directory Tree
  |                 contents: "account:|:password:|:proxy
  |                            account:|:password:|:proxy
  |                            account:|:password:|:proxy"
+ |                 /\
+ |                /!!\  proxy address must be replace by None if you don't want use proxy
+ |               /_!!_\
  |
  |-- account directory: 1 directory for each account
         |
