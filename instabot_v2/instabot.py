@@ -30,9 +30,9 @@ Instabot Directory Tree
  |-- accounts.txt: file which contains the accounts and their proxys ip
  |                 proxy format: http://127.0.0.1:8888
  |                 account:password:proxy (each line)
- |                 contents: "account:password:proxy
- |                            account:password:proxy
- |                            account:password:proxy"
+ |                 contents: "account:|:password:|:proxy
+ |                            account:|:password:|:proxy
+ |                            account:|:password:|:proxy"
  |
  |-- account directory: 1 directory for each account
         |
@@ -131,7 +131,7 @@ def create_ig_api_instances(accounts_filename):
         global accounts
         accounts= []
         for i in range(0, len(accounts_raw)):
-            accounts.append(accounts_raw[i].split('[]'))
+            accounts.append(accounts_raw[i].split(":|:"))
 
 
         # Create InstagramAPI instance for each account
