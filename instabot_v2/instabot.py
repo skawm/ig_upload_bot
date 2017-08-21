@@ -14,8 +14,8 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from instagram_private_api import Client
 
 
-#Import PIL in order to know picture's size
-from PIL import Image
+#Import PIL in order to know picture's size and to add watermarks
+from PIL import Image, ImageFont, ImageDraw
 
 from termcolor import colored, cprint
 
@@ -26,6 +26,8 @@ from termcolor import colored, cprint
 
 """
 Instabot Directory Tree
+ |
+ |-- Instabot.py: the python script bot
  |
  |-- accounts.txt: file which contains the accounts and their proxys ip
  |                 proxy format: http://127.0.0.1:8888
@@ -40,9 +42,19 @@ Instabot Directory Tree
  |-- account directory: 1 directory for each account
         |
         |-- settings.txt: file wich contains device_id, uuid, phone_id
-        |                 contents: "device_id
-        |                            uuid
-        |                            phone_id"
+        |                 contents: "device_id=device_id
+        |                            uuid=uuid
+        |                            phone_id=phone_id
+        |                            watermark=text or image or n
+        |                            watermark_text=watermark_text if use
+        |                            font_file=font_path if use
+        |                            watermark_file=watermark_path if use"
+        |
+        |                   font and watermark file name must be full with their extension
+        |                   font and watermark file must be in the same directory as settings.txt
+        |
+        |
+        |-- tmp: directory containing photos to upload after watermark process
         |
         |-- photos: directory containing photos to upload
 """
@@ -122,6 +134,62 @@ def scheduler_start_n_go():
 #       Instabot jobs       #
 #############################
 
+
+#Add watermark on image
+#Add watermark from text
+def add_watermark(image, final_image_path, watermark_text, font_path):
+	image_width, image_height = image.size
+
+	#Create final image
+	final_image_width, final_image_height = image_width, image_height + image_height / 10
+	final_image = Image.new("RGBA", (int(image_width), int(final_image_height)), color=(255,255,255))
+
+	#Past the picture on the final image
+	final_image.paste(image, (0,0))
+
+	#Write watermarks
+	draw = ImageDraw.Draw(final_image)
+	font_size = int(image_height * image_width /3500) #15000 bestvacations, 7000 videos.ouf
+	font = ImageFont.truetype(font_path, font_size) #FONT TRUETYPE only
+	x, y = draw.textsize(watermark_text, font = font) #text dimensions
+
+	x2 = (final_image_width - x) / 2
+	y2 = image_height + ((final_image_height - image_height) - y) / 2
+	draw.text((x2, y2), watermark_text, (0,0,0), font=font)
+
+	#Save the final image which is ready to be uploaded
+	final_image.save(final_image_path)
+
+#Add watermark from image
+def add_watermark_from_image(image, final_image_path, watermark_path):
+	image_width, image_height = image.size
+
+	#Open watermark image
+	watermark = Image.open(watermark_path)
+
+	#Resize the watermark
+	watermark_width, watermark_height = watermark.size
+	watermark = watermark.resize( ( int(image_width/3*(image_width/watermark_width)), int(image_height/3*(image_height/watermark_height)) ))
+
+	#Paste the watermark on the image wich will be posted on IG
+	image.paste(watermark, (0,0), watermark)
+
+	#Save the final image in the indicated directory
+	image.save(final_image_path)
+
+#Add watermark
+def add_watermark(account, image, final_image_path):
+    settings = open(account + "/settings.txt", "r").read().splitlines()
+    if settings[3].split("=")[-1]=="text":
+        add_watermark_from_text(image, final_image_path, settings[4].split("=")[-1], account+"/"+settings[5].split("=")[-1])
+    if settings[3].split("=")[-1]=="image":
+        add_watermark_from_image(image, final_image_path, account+"/"+settings[6].split("=")[-1])
+    else:
+        #No Watermark
+        #Save image in tmp directory
+        image.save(final_image_path)
+
+
 # Create the InstagramAPI instances for each account
 def create_ig_api_instances(accounts_filename):
     try:
@@ -151,9 +219,9 @@ def create_ig_api_instances(accounts_filename):
                 settings = open(accounts[i][0] + "/settings.txt", "r").read().splitlines()
                 instance[i] = Client(accounts[i][0], accounts[i][1],
                     proxy=accounts[i][2],
-                    device_id=settings[0],
-                    uuid=settings[1],
-                    phone_id=accounts[2])
+                    device_id=settings[0].split("=")[-1],
+                    uuid=settings[1].split("=")[-1],
+                    phone_id=accounts[2].split("=")[-1])
             except:
                 # No files containing settings
                 instance[i] = Client(accounts[i][0], accounts[i][1], proxy=accounts[i][2])
@@ -204,7 +272,7 @@ def upload_photo(number):
             actual_dir_path = os.path.dirname(os.path.realpath(__file__))
 
             # Then determine what is the correspondant pics directory path
-            pics_dir_path = "{0}/pics/{1}/photos".format(actual_dir_path, accounts[number][0])
+            pics_dir_path = "{0}/{1}/photos".format(actual_dir_path, accounts[number][0])
 
             # Chose a random pic inside
             chosen_pic = random.choice(os.listdir(pics_dir_path))
@@ -220,14 +288,19 @@ def upload_photo(number):
 
             # Configure & Upload the pic
             if pic_extension == 'jpg' or extension == 'jpeg':
+                #Open image
+                picture = Image.open(final_pic_path)
+                #Add watermark
+                tmp_file_path = "{0}/{1}/tmp/tmp.jpeg".format(actual_dir_path, accounts[number][0])
+                add_watermark(accounts[number][0], picture, tmp_file_path)
 
                 # Find the picture's size and set it in a tuple which is required by the upload function
-                picture = Image.open(final_pic_path)
+                picture = Image.open(tmp_file_path)
                 width, height = picture.size
                 size = (width, height)
 
                 # Upload the pic
-                instance[number].post_photo(open(final_pic_path, 'rb').read(), size, get_caption(number))
+                instance[number].post_photo(open(tmp_file_path, 'rb').read(), size, get_caption(number))
                 cprint('Just uploaded a pic to {0}'.format(accounts[number][0]), 'green')
 
             else:
